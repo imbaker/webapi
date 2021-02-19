@@ -21,8 +21,14 @@ export class HomeComponent {
     this.dates.push(null);
   }
 
+  updateDate(value: any) {
+    this.dates[value.id] = value.date;
+  }
+
   deleteDate(value: any) {
     console.log("deleteData fired" + value);
+    this.dates.splice(value, 1);
+    console.log(this.dates);
   }
 
   setCookie(name, value, days) {

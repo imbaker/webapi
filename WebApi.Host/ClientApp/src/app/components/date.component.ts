@@ -31,8 +31,9 @@ export class CustomDateParserFormatter extends NgbDateParserFormatter {
 export class DateComponent {
 
   @Input() date: NgbDateStruct;
-  @Input() example: string;
+  @Input() id: string;
   @Output() deleteEvent: EventEmitter<any> = new EventEmitter<any>();
+  @Output() updateEvent: EventEmitter<any> = new EventEmitter<any>();
 
   diffDays: number;
   diffDaysSuffix: string;
@@ -41,7 +42,6 @@ export class DateComponent {
 
   ngOnInit() {
     console.log(this.date);
-    console.log(this.example);
     this.click();
   }
 
@@ -61,10 +61,16 @@ export class DateComponent {
       this.diffDaysSuffix = " in the future"
       this.diffDays = Math.abs(this.diffDays);
     }
+
+    this.update();
+  }
+
+  update() {
+    this.updateEvent.emit({ id: this.id, date: this.date })
   }
 
   delete() {
     console.log("delete pressed");
-    this.deleteEvent.emit();
+    this.deleteEvent.emit(this.id);
   }
 }
