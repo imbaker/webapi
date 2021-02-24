@@ -10,12 +10,16 @@ export class HomeComponent {
 
   model: NgbDateStruct;
 
-  dates: NgbDateStruct[] = [null];
+  dates: NgbDateStruct[] = [];
 
   diffDays: number;
   diffDaysSuffix: string;
 
   constructor(private calendar: NgbCalendar) { }
+
+  ngOnInit() {
+    this.loadDates();
+  }
 
   trackDate(index, date) {
     console.log(index, date);
@@ -34,6 +38,23 @@ export class HomeComponent {
     console.log("deleteData fired" + value);
     this.dates.splice(value, 1);
     console.log(this.dates);
+  }
+
+  saveDates() {
+    for (var i = 0; i < this.dates.length; i++)
+    {
+      console.log("Busy doing nothing" + this.dates[i].toString());
+      localStorage.setItem(`date${i}`, JSON.stringify(this.dates[i]));
+    }
+    this.setCookie("datesCookie", this.dates.toString(), 7);
+  }
+
+  loadDates() {
+    var i = 0;
+    while (localStorage.getItem(`date${i}`) !== null) {
+      this.dates.push(JSON.parse(localStorage.getItem(`date${i}`)));
+      i++;
+    }
   }
 
   setCookie(name, value, days) {
