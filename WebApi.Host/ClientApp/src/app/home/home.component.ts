@@ -17,6 +17,11 @@ export class HomeComponent {
 
   constructor(private calendar: NgbCalendar) { }
 
+  trackDate(index, date) {
+    console.log(index, date);
+    return index;
+  }
+
   addDate() {
     this.dates.push(null);
   }
