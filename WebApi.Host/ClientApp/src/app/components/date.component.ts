@@ -50,9 +50,9 @@ export class DateComponent {
       return;
 
     const targetDate = <any>new Date(this.date.year, this.date.month - 1, this.date.day);
-    const today = <any>new Date(this.calendar.getToday().year, this.calendar.getToday().month - 1, this.calendar.getToday().day)
+    const today = <any>new Date();
 
-    this.diffDays = (today - targetDate) / (1000 * 60 * 60 * 24);
+    this.diffDays = Math.floor((today - targetDate) / (1000 * 60 * 60 * 24));
 
     if (this.diffDays > 0)
       this.diffDaysSuffix = " ago"
