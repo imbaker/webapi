@@ -1,0 +1,5 @@
+<h2>How many days...</h2>
+<p>Enter a date to calculate how many days away it is:</p>
+<app-date *ngFor="let date of dates; let i = index; trackBy: trackDate" [date]="date" [id]="i" (updateEvent)="updateDate($event)" (deleteEvent)="deleteDate($event)"></app-date>
+<button class="btn btn-primary mr-2" (click)="addDate()">Add</button>
+<button class="btn btn-primary" (click)="saveDates()"><span class="bi bi-save"></span> Save</button>
