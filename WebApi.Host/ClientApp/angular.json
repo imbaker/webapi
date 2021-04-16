@@ -23,7 +23,11 @@
             "tsConfig": "src/tsconfig.app.json",
             "assets": [
               "src/assets",
-              "_redirects"
+              {
+                "glob": "_redirects",
+                "input": "src",
+                "output": "/"
+              }
             ],
             "styles": [
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
