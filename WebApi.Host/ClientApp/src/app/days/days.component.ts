@@ -1,5 +1,6 @@
 import { Component, Injectable } from '@angular/core';
 import { NgbCalendar, NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
+import { LocalStorageService } from '../services/local-storage.service';
 
 @Component({
   selector: 'app-home',
@@ -15,7 +16,7 @@ export class DaysComponent {
   diffDays: number;
   diffDaysSuffix: string;
 
-  constructor(private calendar: NgbCalendar) { }
+  constructor(private calendar: NgbCalendar, private localStorageService: LocalStorageService) { }
 
   ngOnInit() {
     this.loadDates();
@@ -41,29 +42,20 @@ export class DaysComponent {
   }
 
   saveDates() {
-    for (var i = 0; i < this.dates.length; i++)
-    {
-      console.log("Busy doing nothing" + this.dates[i].toString());
-      localStorage.setItem(`date${i}`, JSON.stringify(this.dates[i]));
-    }
-    this.setCookie("datesCookie", this.dates.toString(), 7);
+    this.localStorageService.set('dates', this.dates);
   }
 
   loadDates() {
-    var i = 0;
-    while (localStorage.getItem(`date${i}`) !== null) {
-      this.dates.push(JSON.parse(localStorage.getItem(`date${i}`)));
-      i++;
-    }
+    this.dates = this.localStorageService.get('dates') ?? [];
   }
 
   setCookie(name, value, days) {
-  var expires = "";
-  if (days) {
-    var date = new Date();
-    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-    expires = "; expires=" + date.toUTCString();
-  }
-  document.cookie = name + "=" + (value || "") + expires + "; path=/";
+    var expires = "";
+    if (days) {
+      var date = new Date();
+      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+      expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "") + expires + "; path=/";
   }
 }
