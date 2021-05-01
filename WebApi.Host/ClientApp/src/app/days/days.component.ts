@@ -1,20 +1,46 @@
-import { Component, Injectable } from '@angular/core';
-import { NgbCalendar, NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
+import { Component, Injectable, Pipe, PipeTransform } from '@angular/core';
+import { NgbCalendar, NgbDateParserFormatter, NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
 import { LocalStorageService } from '../services/local-storage.service';
+
+@Injectable()
+export class CustomDateParserFormatter extends NgbDateParserFormatter {
+  readonly DELIMITER = '/';
+
+  parse(value: string): NgbDateStruct | null {
+    if (value) {
+      let date = value.split(this.DELIMITER);
+      return {
+        day: parseInt(date[0], 10),
+        month: parseInt(date[1], 10),
+        year: parseInt(date[2], 10)
+      };
+    }
+    return null;
+  }
+
+  format(date: NgbDateStruct | null): string {
+    return date ? `${date.day}${this.DELIMITER}${date.month}${this.DELIMITER}${date.year}` : "";
+  }
+}
+
+@Pipe({ name: 'abs' })
+export class AbsPipe implements PipeTransform {
+  transform(num: number, args?: any): any {
+    return Math.abs(num);
+  }
+}
 
 @Component({
   selector: 'app-home',
   templateUrl: './days.component.html',
+  providers: [{ provide: NgbDateParserFormatter, useClass: CustomDateParserFormatter }]
 })
 
 export class DaysComponent {
 
   model: NgbDateStruct;
 
-  dates: NgbDateStruct[] = [];
-
-  diffDays: number;
-  diffDaysSuffix: string;
+  dateItems: { date: NgbDateStruct, diffDays: number, diffDaysSuffix: string }[] = [];
 
   constructor(private calendar: NgbCalendar, private localStorageService: LocalStorageService) { }
 
@@ -22,40 +48,64 @@ export class DaysComponent {
     this.loadDates();
   }
 
-  trackDate(index, date) {
-    console.log(index, date);
+  trackDate(index: number, date: any) {
     return index;
   }
 
   addDate() {
-    this.dates.push(null);
-  }
-
-  updateDate(value: any) {
-    this.dates[value.id] = value.date;
+    this.dateItems.push({ date: null, diffDays: null, diffDaysSuffix: null });
   }
 
   deleteDate(value: any) {
-    console.log("deleteData fired" + value);
-    this.dates.splice(value, 1);
-    console.log(this.dates);
+    this.dateItems.splice(value, 1);
   }
 
   saveDates() {
-    this.localStorageService.set('dates', this.dates);
+    let dates = this.dateItems.map(item => ({ year: item.date.year, month: item.date.month, day: item.date.day }));
+    this.localStorageService.set('dates', dates);
   }
 
   loadDates() {
-    this.dates = this.localStorageService.get('dates') ?? [];
+    let dates = this.localStorageService.get('dates') ?? [{ date: null, diffDays: null, diffDaysSuffix: null }];
+    this.dateItems = dates.map(item => ({ date: { year: item.year, month: item.month, day: item.day }, diffDays: Math.abs(this.getDiffDays(item)), diffDaysSuffix: "--" }));
   }
 
-  setCookie(name, value, days) {
-    var expires = "";
-    if (days) {
-      var date = new Date();
-      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-      expires = "; expires=" + date.toUTCString();
+  getDiffDays(date: any) {
+    const targetDate = <any>new Date(date.year, date.month - 1, date.day);
+    const today = <any>new Date();
+
+    return Math.floor((today - targetDate) / (1000 * 60 * 60 * 24));
+  }
+
+  getDiffDaysSuffix(date: any) {
+    let diffDays = this.getDiffDays(date);
+
+    if (diffDays == 0)
+      return "";
+
+    return (diffDays > 0) ? " ago" : " in the future";
+  }
+
+  click(index: number) {
+    if (this.dateItems[index] === null)
+      return;
+
+    const targetDate = <any>new Date(this.dateItems[index].date.year, this.dateItems[index].date.month - 1, this.dateItems[index].date.day);
+    const today = <any>new Date();
+
+    let diffDays = Math.floor((today - targetDate) / (1000 * 60 * 60 * 24));
+
+    let diffDaysSuffix = "";
+
+    if (diffDays > 0)
+      diffDaysSuffix = " ago"
+
+    if (diffDays < 0) {
+      diffDaysSuffix = " in the future"
+      diffDays = Math.abs(diffDays);
     }
-    document.cookie = name + "=" + (value || "") + expires + "; path=/";
+
+    this.dateItems[index].diffDaysSuffix = diffDaysSuffix;
+    this.dateItems[index].diffDays = diffDays;
   }
 }

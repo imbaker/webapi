@@ -6,7 +6,7 @@ import { RouterModule } from '@angular/router';
 
 import { AppComponent } from './app.component';
 import { NavMenuComponent } from './nav-menu/nav-menu.component';
-import { DaysComponent } from './days/days.component';
+import { AbsPipe, DaysComponent } from './days/days.component';
 import { SpringsteenComponent } from './springsteen/springsteen.component';
 import { HomeComponent } from './home/home.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -19,7 +19,8 @@ import { DateComponent } from './components/date.component';
     HomeComponent,
     SpringsteenComponent,
     DaysComponent,
-    DateComponent
+    DateComponent,
+    AbsPipe
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
