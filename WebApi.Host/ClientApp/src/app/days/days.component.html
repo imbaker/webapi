@@ -16,8 +16,7 @@
   </div>
   <div class="col-8">
     <div class="m-2" *ngIf="dateItem.diffDays">
-      <div *ngIf="dateItem.diffDays != 1">{{getDiffDays(dateItem.date) | abs}} days {{getDiffDaysSuffix(dateItem.date)}}</div>
-      <div *ngIf="dateItem.diffDays == 1">{{getDiffDays(dateItem.date) | abs}} day {{getDiffDaysSuffix(dateItem.date)}}</div>
+      <div>{{getDiffDays(dateItem.date) | abs}} day<span *ngIf="getDiffDays(dateItem.date) != 1 && getDiffDays(dateItem.date) != -1">s</span> {{getDiffDaysSuffix(dateItem.date)}}</div>
     </div>
   </div>
 </div>
