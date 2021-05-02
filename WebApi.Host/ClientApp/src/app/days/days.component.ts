@@ -1,6 +1,9 @@
 import { Component, Injectable, Pipe, PipeTransform } from '@angular/core';
 import { NgbCalendar, NgbDateParserFormatter, NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
 import { LocalStorageService } from '../services/local-storage.service';
+import { library, dom } from '@fortawesome/fontawesome-svg-core';
+import { fas, faTrashAlt, faCalendarDay, faSave } from '@fortawesome/free-solid-svg-icons';
+
 
 @Injectable()
 export class CustomDateParserFormatter extends NgbDateParserFormatter {
@@ -42,7 +45,10 @@ export class DaysComponent {
 
   dateItems: { date: NgbDateStruct, diffDays: number, diffDaysSuffix: string }[] = [];
 
-  constructor(private calendar: NgbCalendar, private localStorageService: LocalStorageService) { }
+  constructor(private calendar: NgbCalendar, private localStorageService: LocalStorageService) {
+    library.add(fas, faTrashAlt, faCalendarDay, faSave);
+    dom.watch();
+  }
 
   ngOnInit() {
     this.loadDates();
