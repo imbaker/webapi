@@ -1,24 +1,28 @@
 <h2>How many days...</h2>
 <p>Enter a date to calculate how many days away it is:</p>
-<div class="row my-2" *ngFor="let dateItem of dateItems; let i = index;">
-  <div class="col-4">
-    <div class="input-group">
-      <input class="pl-2" type="text" ngbDatepicker #d="ngbDatepicker" [(ngModel)]="dateItem.date" (dateSelect)="click(i)" />
-      <div class="input-group-append">
-        <button class="btn btn-primary" (click)="d.toggle()">
-          <i class="fas fa-calendar-day"></i>
-        </button>
-        <button *ngIf="dateItems.length > 1" class="btn btn-danger mr-2" (click)="deleteDate(i)">
-          <i class="fas fa-trash-alt"></i>
-        </button>
+<form [formGroup]="form">
+  <ng-container formArrayName="dates" *ngFor="let date of form.get('dates')['controls']; let i = index">
+    <div class="row my-2">
+      <div class="col-4">
+        <div class="input-group">
+          <input class="form-control pl-2" type="text" [formControlName]="i" [ngClass]="{'is-valid': date.touch && date.valid, 'is-invalid': date.touched && date.invalid}" ngbDatepicker #d="ngbDatepicker" (change)="clickDate(date)" (dateSelect)="clickDate(date)" />
+          <div class="input-group-append">
+            <button class="btn btn-primary" (click)="d.toggle()">
+              <i class="fas fa-calendar-day"></i>
+            </button>
+            <button *ngIf="form.get('dates').length > 1" class="btn btn-danger mr-2" (click)="deleteDate(i)">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="col-7 my-2">
+        <span *ngIf="date.valid && date.value != null">{{getDiffDays(date) | abs}} day<span *ngIf="getDiffDays(date) != 1 && getDiffDays(date) != -1">s</span> {{getDiffDaysSuffix(date)}}</span>
+        <span class="text-danger" *ngIf="date.touched && date.errors?.invalidDate">Please enter a valid date</span>
       </div>
     </div>
-  </div>
-  <div class="col-8">
-    <div class="m-2" *ngIf="dateItem.diffDays">
-      <div>{{getDiffDays(dateItem.date) | abs}} day<span *ngIf="getDiffDays(dateItem.date) != 1 && getDiffDays(dateItem.date) != -1">s</span> {{getDiffDaysSuffix(dateItem.date)}}</div>
-    </div>
-  </div>
-</div>
-<button class="btn btn-primary mr-2" (click)="addDate()">Add</button>
-<button class="btn btn-primary" (click)="saveDates()"><span class="fa fa-save"></span> Save</button>
+  </ng-container>
+  <button class="btn btn-primary mr-2" (click)="addDate()">Add</button>
+  <button class="btn btn-primary" (click)="saveDates()" [disabled]="form.valid && !form.dirty"><span class="fa fa-save"></span> Save</button>
+</form>
+<app-toasts aria-live="polite" aria-atomic="true"></app-toasts>

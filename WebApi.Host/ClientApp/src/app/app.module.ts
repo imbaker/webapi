@@ -11,6 +11,8 @@ import { SpringsteenComponent } from './springsteen/springsteen.component';
 import { HomeComponent } from './home/home.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { DateComponent } from './components/date.component';
+import { NgbdToastGlobal } from './services/toast-global.component';
+import { ToastsContainer } from './services/toast-container.component';
 
 @NgModule({
   declarations: [
@@ -20,7 +22,9 @@ import { DateComponent } from './components/date.component';
     SpringsteenComponent,
     DaysComponent,
     DateComponent,
-    AbsPipe
+    AbsPipe,
+    NgbdToastGlobal,
+    ToastsContainer
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),

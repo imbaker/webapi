@@ -3,6 +3,8 @@ import { NgbCalendar, NgbDateParserFormatter, NgbDateStruct } from '@ng-bootstra
 import { LocalStorageService } from '../services/local-storage.service';
 import { library, dom } from '@fortawesome/fontawesome-svg-core';
 import { fas, faTrashAlt, faCalendarDay, faSave } from '@fortawesome/free-solid-svg-icons';
+import { AbstractControl, FormArray, FormControl, FormGroup, ValidatorFn } from '@angular/forms';
+import { ToastService } from '../services/toast.service';
 
 
 @Injectable()
@@ -36,6 +38,7 @@ export class AbsPipe implements PipeTransform {
 @Component({
   selector: 'app-home',
   templateUrl: './days.component.html',
+  styleUrls: ['./days.component.css'],
   providers: [{ provide: NgbDateParserFormatter, useClass: CustomDateParserFormatter }]
 })
 
@@ -43,9 +46,9 @@ export class DaysComponent {
 
   model: NgbDateStruct;
 
-  dateItems: { date: NgbDateStruct, diffDays: number, diffDaysSuffix: string }[] = [];
+  form = new FormGroup({ dates: new FormArray([]) });
 
-  constructor(private calendar: NgbCalendar, private localStorageService: LocalStorageService) {
+  constructor(private calendar: NgbCalendar, private localStorageService: LocalStorageService, public toastService: ToastService) {
     library.add(fas, faTrashAlt, faCalendarDay, faSave);
     dom.watch();
   }
@@ -59,25 +62,40 @@ export class DaysComponent {
   }
 
   addDate() {
-    this.dateItems.push({ date: null, diffDays: null, diffDaysSuffix: null });
+    (<FormArray>this.form.get('dates')).push(new FormControl(null, [this.dateValidator()]));
   }
 
-  deleteDate(value: any) {
-    this.dateItems.splice(value, 1);
+  deleteDate(index: number) {
+    (<FormArray>this.form.get('dates')).removeAt(index);
+    this.form.markAsDirty();
+  }
+
+  onSubmit() {
+    this.saveDates();
   }
 
   saveDates() {
-    let dates = this.dateItems.map(item => ({ year: item.date.year, month: item.date.month, day: item.date.day }));
+    if (!this.form.valid) {
+      this.toastService.show("Content not saved, one or more dates are invalid", { classname: 'bg-danger text-light', delay: 10000 })
+      return;
+    }
+
+    let dates = (<FormArray>this.form.get('dates')).controls.map(item => item.value);
     this.localStorageService.set('dates', dates);
+    this.toastService.show("Saved successfully", { classname: 'bg-success text-light', delay: 5000 });
+    this.form.markAsPristine();
   }
 
   loadDates() {
-    let dates = this.localStorageService.get('dates') ?? [{ date: null, diffDays: null, diffDaysSuffix: null }];
-    this.dateItems = dates.map(item => ({ date: { year: item.year, month: item.month, day: item.day }, diffDays: Math.abs(this.getDiffDays(item)), diffDaysSuffix: "--" }));
+    let dates = this.localStorageService.get('dates') ?? [];
+    const form = this.form.get('dates') as FormArray;
+    dates.forEach(item => form.push(new FormControl(item, [this.dateValidator()])));
   }
 
   getDiffDays(date: any) {
-    const targetDate = <any>new Date(date.year, date.month - 1, date.day);
+    if (date.value == null)
+      return;
+    const targetDate = <any>new Date(date.value.year, date.value.month - 1, date.value.day);
     const today = <any>new Date();
 
     return Math.floor((today - targetDate) / (1000 * 60 * 60 * 24));
@@ -96,7 +114,7 @@ export class DaysComponent {
     if (this.dateItems[index] === null)
       return;
 
-    const targetDate = <any>new Date(this.dateItems[index].date.year, this.dateItems[index].date.month - 1, this.dateItems[index].date.day);
+    const targetDate = <any>new Date(this.dateItems[index].year, this.dateItems[index].month - 1, this.dateItems[index].day);
     const today = <any>new Date();
 
     let diffDays = Math.floor((today - targetDate) / (1000 * 60 * 60 * 24));
@@ -110,8 +128,33 @@ export class DaysComponent {
       diffDaysSuffix = " in the future"
       diffDays = Math.abs(diffDays);
     }
+  }
 
-    this.dateItems[index].diffDaysSuffix = diffDaysSuffix;
-    this.dateItems[index].diffDays = diffDays;
+  clickDate(date: any) {
+    const targetDate = <any>new Date(date.value.year, date.value.month - 1, date.value.day);
+    const today = <any>new Date();
+
+    let diffDays = Math.floor((today - targetDate) / (1000 * 60 * 60 * 24));
+
+    let diffDaysSuffix = "";
+
+    if (diffDays > 0)
+      diffDaysSuffix = " ago"
+
+    if (diffDays < 0) {
+      diffDaysSuffix = " in the future"
+      diffDays = Math.abs(diffDays);
+    }
+  }
+
+  dateValidator(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+      console.log(`In validator - ${control.value}`);
+      if (control.value === null)
+        return;
+      const targetDate = <any>new Date(control.value.year, control.value.month - 1, control.value.day);
+      let date = Date.parse(targetDate);
+      return isNaN(date) ? { invalidDate: { value: control.value }} : null;
+    }
   }
 }
