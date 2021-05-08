@@ -110,26 +110,6 @@ export class DaysComponent {
     return (diffDays > 0) ? " ago" : " in the future";
   }
 
-  click(index: number) {
-    if (this.dateItems[index] === null)
-      return;
-
-    const targetDate = <any>new Date(this.dateItems[index].year, this.dateItems[index].month - 1, this.dateItems[index].day);
-    const today = <any>new Date();
-
-    let diffDays = Math.floor((today - targetDate) / (1000 * 60 * 60 * 24));
-
-    let diffDaysSuffix = "";
-
-    if (diffDays > 0)
-      diffDaysSuffix = " ago"
-
-    if (diffDays < 0) {
-      diffDaysSuffix = " in the future"
-      diffDays = Math.abs(diffDays);
-    }
-  }
-
   clickDate(date: any) {
     const targetDate = <any>new Date(date.value.year, date.value.month - 1, date.value.day);
     const today = <any>new Date();
