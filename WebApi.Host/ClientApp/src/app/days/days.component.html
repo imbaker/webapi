@@ -3,7 +3,7 @@
 <form [formGroup]="form">
   <ng-container formArrayName="dates" *ngFor="let date of form.get('dates')['controls']; let i = index">
     <div class="row my-2">
-      <div class="col-6">
+      <div class="col-6 col-sm-4">
         <div class="input-group">
           <input class="form-control pl-2" type="text" [formControlName]="i" [ngClass]="{'is-valid': date.touch && date.valid, 'is-invalid': date.touched && date.invalid}" ngbDatepicker #d="ngbDatepicker" (change)="clickDate(date)" (dateSelect)="clickDate(date)" />
           <div class="input-group-append">
@@ -16,8 +16,15 @@
           </div>
         </div>
       </div>
-      <div class="col-6 my-2 pl-0">
-        <span *ngIf="date.valid && date.value != null">{{getDiffDays(date) | abs | number:'1.0'}} day<span *ngIf="getDiffDays(date) != 1 && getDiffDays(date) != -1">s</span> {{getDiffDaysSuffix(date)}}</span>
+      <div class="col my-2 pl-0">
+        <span *ngIf="date.valid && date.value != null">
+          <span *ngIf="getDiffDays(date) == 0">
+            today
+          </span>
+          <span *ngIf="getDiffDays(date) != 0">
+            {{getDiffDays(date) | abs | number:'1.0'}} day<span *ngIf="getDiffDays(date) != 1 && getDiffDays(date) != -1">s</span> {{getDiffDaysSuffix(date)}}
+          </span>
+        </span>
         <span class="text-danger" *ngIf="date.touched && date.errors?.invalidDate">Please enter a valid date</span>
       </div>
     </div>

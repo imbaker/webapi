@@ -1,39 +1,12 @@
-import { Component, Injectable, Pipe, PipeTransform } from '@angular/core';
-import { NgbCalendar, NgbDateParserFormatter, NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
+import { Component } from '@angular/core';
+import { NgbDateParserFormatter, NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
 import { LocalStorageService } from '../services/local-storage.service';
 import { library, dom } from '@fortawesome/fontawesome-svg-core';
 import { fas, faTrashAlt, faCalendarDay, faSave } from '@fortawesome/free-solid-svg-icons';
 import { AbstractControl, FormArray, FormControl, FormGroup, ValidatorFn } from '@angular/forms';
 import { ToastService } from '../services/toast.service';
+import { CustomDateParserFormatter } from '../services/custom-date-parser-formatter.component';
 
-
-@Injectable()
-export class CustomDateParserFormatter extends NgbDateParserFormatter {
-  readonly DELIMITER = '/';
-
-  parse(value: string): NgbDateStruct | null {
-    if (value) {
-      let date = value.split(this.DELIMITER);
-      return {
-        day: parseInt(date[0], 10),
-        month: parseInt(date[1], 10),
-        year: parseInt(date[2], 10)
-      };
-    }
-    return null;
-  }
-
-  format(date: NgbDateStruct | null): string {
-    return date ? `${date.day}${this.DELIMITER}${date.month}${this.DELIMITER}${date.year}` : "";
-  }
-}
-
-@Pipe({ name: 'abs' })
-export class AbsPipe implements PipeTransform {
-  transform(num: number, args?: any): any {
-    return Math.abs(num);
-  }
-}
 
 @Component({
   selector: 'app-home',
@@ -48,7 +21,7 @@ export class DaysComponent {
 
   form = new FormGroup({ dates: new FormArray([]) });
 
-  constructor(private calendar: NgbCalendar, private localStorageService: LocalStorageService, public toastService: ToastService) {
+  constructor(private localStorageService: LocalStorageService, private toastService: ToastService) {
     library.add(fas, faTrashAlt, faCalendarDay, faSave);
     dom.watch();
   }
@@ -102,29 +75,17 @@ export class DaysComponent {
   }
 
   getDiffDaysSuffix(date: any) {
-    let diffDays = this.getDiffDays(date);
-
-    if (diffDays == 0)
-      return "";
-
-    return (diffDays > 0) ? " ago" : " in the future";
-  }
-
-  clickDate(date: any) {
     const targetDate = <any>new Date(date.value.year, date.value.month - 1, date.value.day);
     const today = <any>new Date();
 
-    let diffDays = Math.floor((today - targetDate) / (1000 * 60 * 60 * 24));
+    if (targetDate == today)
+      return "";
 
-    let diffDaysSuffix = "";
+    return (targetDate < today) ? " ago" : " in the future";
+  }
 
-    if (diffDays > 0)
-      diffDaysSuffix = " ago"
-
-    if (diffDays < 0) {
-      diffDaysSuffix = " in the future"
-      diffDays = Math.abs(diffDays);
-    }
+  clickDate(date: any) {
+    this.getDiffDaysSuffix(date);
   }
 
   dateValidator(): ValidatorFn {

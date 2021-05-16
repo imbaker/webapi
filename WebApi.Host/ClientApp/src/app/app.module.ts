@@ -6,7 +6,8 @@ import { RouterModule } from '@angular/router';
 
 import { AppComponent } from './app.component';
 import { NavMenuComponent } from './nav-menu/nav-menu.component';
-import { AbsPipe, DaysComponent } from './days/days.component';
+import { DaysComponent } from './days/days.component';
+import { AbsPipe } from './days/abs.pipe';
 import { SpringsteenComponent } from './springsteen/springsteen.component';
 import { HomeComponent } from './home/home.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
